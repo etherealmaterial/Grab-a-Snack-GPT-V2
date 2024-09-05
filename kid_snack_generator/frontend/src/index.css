@@ -1,0 +1,13 @@
+.App {
+  text-align: center;
+  padding: 20px;
+}
+
+.snack-card {
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin: 10px;
+  border-radius: 8px;
+  display: inline-block;
+  width: 300px;
+}
