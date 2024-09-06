@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from openai import OpenAI  # Import OpenAI client
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
 import logging
@@ -33,8 +33,6 @@ class Child(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     exclusions = db.Column(db.String(500))
-    # Temporary column for migration (to trigger changes, remove later)
-    dummy_column = db.Column(db.String(100), nullable=True)  # Add this line
 
 class ChildSnack(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -56,6 +54,60 @@ def get_children():
     except Exception as e:
         logging.error(f"Error fetching children: {e}")
         return jsonify({"error": "Error fetching children. Please try again."}), 500
+
+@app.route('/api/children', methods=['POST'])
+def add_child():
+    data = request.json
+    name = data.get('name')
+    exclusions = data.get('exclusions', '')
+
+    if not name:
+        return jsonify({"error": "Child name is required"}), 400
+
+    try:
+        new_child = Child(name=name, exclusions=exclusions)
+        db.session.add(new_child)
+        db.session.commit()
+        return jsonify({"message": "Child added successfully", "child": {"id": new_child.id, "name": new_child.name, "exclusions": new_child.exclusions}}), 201
+    except Exception as e:
+        logging.error(f"Error adding child: {e}")
+        return jsonify({"error": "Error adding child. Please try again."}), 500
+
+@app.route('/api/children/<int:child_id>', methods=['PUT'])
+def update_child(child_id):
+    data = request.json
+    name = data.get('name')
+    exclusions = data.get('exclusions')
+
+    try:
+        child = Child.query.get(child_id)
+        if not child:
+            return jsonify({"error": "Child not found"}), 404
+
+        if name:
+            child.name = name
+        if exclusions is not None:
+            child.exclusions = exclusions
+
+        db.session.commit()
+        return jsonify({"message": "Child updated successfully"}), 200
+    except Exception as e:
+        logging.error(f"Error updating child: {e}")
+        return jsonify({"error": "Error updating child. Please try again."}), 500
+
+@app.route('/api/children/<int:child_id>', methods=['DELETE'])
+def delete_child(child_id):
+    try:
+        child = Child.query.get(child_id)
+        if not child:
+            return jsonify({"error": "Child not found"}), 404
+
+        db.session.delete(child)
+        db.session.commit()
+        return jsonify({"message": "Child deleted successfully"}), 200
+    except Exception as e:
+        logging.error(f"Error deleting child: {e}")
+        return jsonify({"error": "Error deleting child. Please try again."}), 500
 
 @app.route('/get_snack', methods=['POST'])
 def get_snack():
@@ -94,34 +146,55 @@ def get_snack():
         logging.error(f"Error generating snack: {e}")
         return jsonify({"error": "Error generating snack. Please try again."}), 500
 
-@app.route('/update_child', methods=['POST'])
-def update_child():
+@app.route('/save_snack', methods=['POST'])
+def save_snack():
     data = request.json
     child_id = data.get('child_id')
-    new_name = data.get('name')
-    new_exclusions = data.get('exclusions')
+    snack = data.get('snack')
+    image_url = data.get('image_url')
 
-    if not child_id:
-        return jsonify({"error": "Child ID is required"}), 400
+    if not child_id or not snack:
+        return jsonify({"error": "Child ID and snack are required"}), 400
 
     try:
-        # Find the child by ID
-        child = Child.query.get(child_id)
-        if not child:
-            return jsonify({"error": "Child not found"}), 404
+        # Check if the snack already exists
+        existing_snack = ChildSnack.query.filter_by(child_id=child_id, snack=snack).first()
+        if existing_snack:
+            return jsonify({"message": "Snack already saved"}), 200
 
-        # Update the child's information
-        if new_name:
-            child.name = new_name
-        if new_exclusions:
-            child.exclusions = new_exclusions
-
-        # Commit the changes to the database
+        # Create a new ChildSnack entry
+        child_snack = ChildSnack(child_id=child_id, snack=snack, image_url=image_url)
+        db.session.add(child_snack)
         db.session.commit()
-        return jsonify({"message": "Child updated successfully"}), 200
+
+        return jsonify({"message": "Snack saved successfully"}), 200
     except Exception as e:
-        logging.error(f"Error updating child: {e}")
-        return jsonify({"error": "Error updating child. Please try again."}), 500
+        logging.error(f"Error saving snack: {e}")
+        return jsonify({"error": "Error saving snack. Please try again."}), 500
+
+@app.route('/get_snacks/<int:child_id>', methods=['GET'])
+def get_snacks(child_id):
+    try:
+        snacks = ChildSnack.query.filter_by(child_id=child_id).all()
+        snacks_data = [{"id": snack.id, "snack": snack.snack, "image_url": snack.image_url} for snack in snacks]
+        return jsonify(snacks_data), 200
+    except Exception as e:
+        logging.error(f"Error fetching snacks: {e}")
+        return jsonify({"error": "Error fetching snacks. Please try again."}), 500
+
+@app.route('/delete_snack/<int:snack_id>', methods=['DELETE'])
+def delete_snack(snack_id):
+    try:
+        snack = ChildSnack.query.get(snack_id)
+        if not snack:
+            return jsonify({"error": "Snack not found"}), 404
+
+        db.session.delete(snack)
+        db.session.commit()
+        return jsonify({"message": "Snack deleted successfully"}), 200
+    except Exception as e:
+        logging.error(f"Error deleting snack: {e}")
+        return jsonify({"error": "Error deleting snack. Please try again."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -7,9 +7,10 @@ const App = () => {
     const [children, setChildren] = useState([]);
     const [selectedChildren, setSelectedChildren] = useState([]);
     const [snack, setSnack] = useState('');
-    const [snackImage, setSnackImage] = useState('');
+    const [image, setImage] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isSnackSaved, setIsSnackSaved] = useState(false);
 
     // Fetch the list of children
     const fetchChildren = async () => {
@@ -36,7 +37,8 @@ const App = () => {
         setLoading(true);
         setError('');
         setSnack('');
-        setSnackImage('');
+        setImage('');
+        setIsSnackSaved(false);  // Reset the saved state
         try {
             const response = await fetch('/get_snack', {
                 method: 'POST',
@@ -47,7 +49,7 @@ const App = () => {
             const data = await response.json();
             if (response.ok && data.snack) {
                 setSnack(data.snack);
-                setSnackImage(data.image_url);
+                setImage(data.image_url);
             } else {
                 throw new Error(data.error || 'Failed to generate snack');
             }
@@ -58,15 +60,45 @@ const App = () => {
         }
     };
 
+    // Handle saving a snack
+    const handleSaveSnack = async () => {
+        if (isSnackSaved) return; // Prevent duplicate saves
+
+        try {
+            const response = await fetch('/save_snack', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    child_id: selectedChildren[0], // Assuming you are saving for the first selected child
+                    snack: snack,
+                    image_url: image,
+                }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                setIsSnackSaved(true); // Mark as saved
+            } else {
+                console.error('Error saving snack:', data.error);
+            }
+        } catch (error) {
+            console.error('Error saving snack:', error);
+        }
+    };
+
     return (
         <Router>
             <div className="App">
                 <h1 className="header">Kid Snack Generator</h1>
                 <Routes>
+                    {/* Route for managing children */}
                     <Route
                         path="/admin"
                         element={<ManageChildren fetchChildren={fetchChildren} children={children} />}
                     />
+
+                    {/* Route for selecting children and getting a snack */}
                     <Route
                         path="/"
                         element={
@@ -94,10 +126,11 @@ const App = () => {
                                 </div>
 
                                 {snack && (
-                                    <div className="snack-card snack-result">
-                                        {snackImage && <img src={snackImage} alt="Snack" className="snack-image" />}
+                                    <div className="snack-card snack-result" onClick={handleSaveSnack}>
+                                        <img src={image} alt="Snack" className="snack-image" />
                                         <h2>Suggested Snack:</h2>
                                         <p>{snack}</p>
+                                        <button onClick={(e) => { e.stopPropagation(); handleSaveSnack(); }}>Save Snack</button>
                                     </div>
                                 )}
                             </div>

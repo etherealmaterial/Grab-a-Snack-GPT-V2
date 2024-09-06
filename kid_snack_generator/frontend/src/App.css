@@ -66,6 +66,7 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 300px;
   text-align: center;
+  cursor: pointer;
 }
 
 .snack-result {
@@ -73,10 +74,10 @@ body {
 }
 
 .snack-image {
-  max-width: 100%;
+  width: 100%;
   height: auto;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .error {
@@ -110,4 +111,22 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+
+/* Additional styles for the delete button */
+.delete-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
 }
