@@ -1,101 +1,127 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-import openai
+from openai import OpenAI  # Import OpenAI client
 import os
+from dotenv import load_dotenv
+import logging
+from flask_migrate import Migrate
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for the React app
+
+# Enable CORS for the React app
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///children.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Securely load the OpenAI API Key from environment variables
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Initialize Flask-Migrate
+migrate = Migrate(app, db)
 
-# Database Model
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+logging.basicConfig(level=logging.DEBUG)
+
+# Database Models
 class Child(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    exclusions = db.Column(db.String(500))  # Comma-separated exclusions
+    exclusions = db.Column(db.String(500))
+    # Temporary column for migration (to trigger changes, remove later)
+    dummy_column = db.Column(db.String(100), nullable=True)  # Add this line
 
-# Create the database tables within an application context
-with app.app_context():
-    db.create_all()
+class ChildSnack(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    child_id = db.Column(db.Integer, db.ForeignKey('child.id'), nullable=False)
+    snack = db.Column(db.String(500), nullable=False)
+    image_url = db.Column(db.String(500))
 
-# API route to get all children
+    # Relationship to the Child model
+    child = db.relationship('Child', backref=db.backref('snacks', lazy=True))
+
+# API Routes
+
 @app.route('/api/children', methods=['GET'])
 def get_children():
-    children = Child.query.all()
-    children_data = [{"id": child.id, "name": child.name, "exclusions": child.exclusions} for child in children]
-    return jsonify(children_data)
+    try:
+        children = Child.query.all()
+        children_data = [{"id": child.id, "name": child.name, "exclusions": child.exclusions} for child in children]
+        return jsonify(children_data), 200
+    except Exception as e:
+        logging.error(f"Error fetching children: {e}")
+        return jsonify({"error": "Error fetching children. Please try again."}), 500
 
-# API route to add a new child
-@app.route('/api/children', methods=['POST'])
-def add_child():
-    data = request.get_json()
-    name = data.get('name')
-    exclusions = data.get('exclusions')
-
-    if not name:
-        return jsonify({"error": "Name is required"}), 400
-
-    new_child = Child(name=name, exclusions=exclusions)
-    db.session.add(new_child)
-    db.session.commit()
-    return jsonify({"message": "Child added successfully"}), 201
-
-# API route to update a child
-@app.route('/api/children/<int:child_id>', methods=['PUT'])
-def update_child(child_id):
-    data = request.get_json()
-    child = Child.query.get(child_id)
-
-    if not child:
-        return jsonify({"error": "Child not found"}), 404
-
-    child.name = data.get('name', child.name)
-    child.exclusions = data.get('exclusions', child.exclusions)
-    db.session.commit()
-    return jsonify({"message": "Child updated successfully"}), 200
-
-# API route to delete a child
-@app.route('/api/children/<int:child_id>', methods=['DELETE'])
-def delete_child(child_id):
-    child = Child.query.get(child_id)
-
-    if not child:
-        return jsonify({"error": "Child not found"}), 404
-
-    db.session.delete(child)
-    db.session.commit()
-    return jsonify({"message": "Child deleted successfully"}), 200
-
-# API route to generate a snack idea
 @app.route('/get_snack', methods=['POST'])
 def get_snack():
     selected_children_ids = request.json.get('children', [])
     if not selected_children_ids:
         return jsonify({"error": "No children selected"}), 400
 
-    children = Child.query.filter(Child.id.in_(selected_children_ids)).all()
-    exclusions = [exclusion for child in children for exclusion in (child.exclusions or '').split(',')]
-
-    # Generate Snack using OpenAI API
     try:
+        children = Child.query.filter(Child.id.in_(selected_children_ids)).all()
+        exclusions = [exclusion.strip() for child in children for exclusion in (child.exclusions or '').split(',') if exclusion]
+
+        # Generate Snack using OpenAI's GPT-3.5 Turbo model
         prompt = f"Generate a kid-friendly snack considering these exclusions: {', '.join(exclusions)}."
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=150
         )
-        snack_idea = response.choices[0].text.strip()
-        return jsonify({'snack': snack_idea})
+        snack_idea = response.choices[0].message.content.strip()
+
+        # Generate Image using OpenAI's DALL-E model
+        image_prompt = f"A photo of a kid-friendly snack: {snack_idea}."
+        image_response = client.images.generate(
+            prompt=image_prompt,
+            n=1,
+            size="512x512"
+        )
+
+        image_url = image_response.data[0].url
+
+        return jsonify({'snack': snack_idea, 'image_url': image_url})
+    except openai.OpenAIError as e:
+        logging.error(f"OpenAI API Error: {e}")
+        return jsonify({"error": f"OpenAI API Error: {str(e)}"}), 500
     except Exception as e:
-        print(f"Error generating snack: {e}")
+        logging.error(f"Error generating snack: {e}")
         return jsonify({"error": "Error generating snack. Please try again."}), 500
+
+@app.route('/update_child', methods=['POST'])
+def update_child():
+    data = request.json
+    child_id = data.get('child_id')
+    new_name = data.get('name')
+    new_exclusions = data.get('exclusions')
+
+    if not child_id:
+        return jsonify({"error": "Child ID is required"}), 400
+
+    try:
+        # Find the child by ID
+        child = Child.query.get(child_id)
+        if not child:
+            return jsonify({"error": "Child not found"}), 404
+
+        # Update the child's information
+        if new_name:
+            child.name = new_name
+        if new_exclusions:
+            child.exclusions = new_exclusions
+
+        # Commit the changes to the database
+        db.session.commit()
+        return jsonify({"message": "Child updated successfully"}), 200
+    except Exception as e:
+        logging.error(f"Error updating child: {e}")
+        return jsonify({"error": "Error updating child. Please try again."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

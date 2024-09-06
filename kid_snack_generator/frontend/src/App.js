@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import ManageChildren from './ManageChildren'; // Import the ManageChildren component
+import ManageChildren from './ManageChildren';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 const App = () => {
     const [children, setChildren] = useState([]);
     const [selectedChildren, setSelectedChildren] = useState([]);
     const [snack, setSnack] = useState('');
+    const [snackImage, setSnackImage] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -14,10 +15,15 @@ const App = () => {
     const fetchChildren = async () => {
         try {
             const response = await fetch('/api/children');
-            const data = await response.json();
-            setChildren(data);
+            if (response.ok) {
+                const data = await response.json();
+                setChildren(data);
+            } else {
+                throw new Error(`Failed to fetch: ${response.status}`);
+            }
         } catch (error) {
             console.error('Error fetching children:', error);
+            setError('Error fetching children.');
         }
     };
 
@@ -29,6 +35,8 @@ const App = () => {
     const handleGetSnack = async () => {
         setLoading(true);
         setError('');
+        setSnack('');
+        setSnackImage('');
         try {
             const response = await fetch('/get_snack', {
                 method: 'POST',
@@ -37,11 +45,14 @@ const App = () => {
             });
 
             const data = await response.json();
-            if (data && data.snack) {
+            if (response.ok && data.snack) {
                 setSnack(data.snack);
+                setSnackImage(data.image_url);
+            } else {
+                throw new Error(data.error || 'Failed to generate snack');
             }
         } catch (error) {
-            setError('Error generating snack. Please try again.');
+            setError(error.message || 'Error generating snack. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -52,10 +63,10 @@ const App = () => {
             <div className="App">
                 <h1 className="header">Kid Snack Generator</h1>
                 <Routes>
-                    {/* Route for managing children */}
-                    <Route path="/admin" element={<ManageChildren fetchChildren={fetchChildren} />} />
-
-                    {/* Route for selecting children and getting a snack */}
+                    <Route
+                        path="/admin"
+                        element={<ManageChildren fetchChildren={fetchChildren} children={children} />}
+                    />
                     <Route
                         path="/"
                         element={
@@ -84,6 +95,7 @@ const App = () => {
 
                                 {snack && (
                                     <div className="snack-card snack-result">
+                                        {snackImage && <img src={snackImage} alt="Snack" className="snack-image" />}
                                         <h2>Suggested Snack:</h2>
                                         <p>{snack}</p>
                                     </div>

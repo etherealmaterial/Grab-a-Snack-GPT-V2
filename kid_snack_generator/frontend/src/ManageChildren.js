@@ -1,125 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './ManageChildren.css';
 
-const ManageChildren = ({ fetchChildren }) => {
-    const [children, setChildren] = useState([]);
-    const [childName, setChildName] = useState('');
-    const [childExclusions, setChildExclusions] = useState('');
-    const [loading, setLoading] = useState(false);
+const ManageChildren = ({ fetchChildren, children }) => {
+    const [selectedChild, setSelectedChild] = useState(null);
+    const [newName, setNewName] = useState('');
+    const [newExclusions, setNewExclusions] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
-        fetchChildren(); // Use the prop function to fetch children
-    }, [fetchChildren]);
+    const handleChildSelect = (child) => {
+        setSelectedChild(child);
+        setNewName(child.name);
+        setNewExclusions(child.exclusions);
+    };
 
-    const handleAddChild = async () => {
-        if (!childName) {
-            setError('Child name is required');
-            return;
-        }
-        setLoading(true);
+    const handleUpdateChild = async () => {
         setError('');
         setSuccess('');
+
         try {
-            const response = await fetch('/api/children', {
+            const response = await fetch('/update_child', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: childName, exclusions: childExclusions }),
+                body: JSON.stringify({
+                    child_id: selectedChild.id,
+                    name: newName,
+                    exclusions: newExclusions,
+                }),
             });
 
-            if (!response.ok) throw new Error('Failed to add child');
-
-            setSuccess('Child added successfully');
-            fetchChildren(); // Refresh the list using prop function
-            setChildName('');
-            setChildExclusions('');
-        } catch (err) {
-            setError('Error adding child. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDeleteChild = async (id) => {
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        try {
-            const response = await fetch(`/api/children/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) throw new Error('Failed to delete child');
-
-            setSuccess('Child deleted successfully');
-            fetchChildren(); // Refresh the list using prop function
-        } catch (err) {
-            setError('Error deleting child. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleUpdateChild = async (id, name, exclusions) => {
-        setLoading(true);
-        setError('');
-        setSuccess('');
-        try {
-            const response = await fetch(`/api/children/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, exclusions }),
-            });
-
-            if (!response.ok) throw new Error('Failed to update child');
-
-            setSuccess('Child updated successfully');
-            fetchChildren(); // Refresh the list using prop function
-        } catch (err) {
-            setError('Error updating child. Please try again.');
-        } finally {
-            setLoading(false);
+            const data = await response.json();
+            if (response.ok) {
+                setSuccess('Child updated successfully!');
+                fetchChildren(); // Refresh the list of children after update
+            } else {
+                throw new Error(data.error || 'Failed to update child');
+            }
+        } catch (error) {
+            setError(error.message || 'Error updating child. Please try again.');
         }
     };
 
     return (
-        <div className="manage-children">
+        <div>
             <h2>Manage Children</h2>
-            {error && <div className="error">{error}</div>}
-            {success && <div className="success">{success}</div>}
-            <div className="form-container">
-                <input
-                    type="text"
-                    placeholder="Child Name"
-                    value={childName}
-                    onChange={(e) => setChildName(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Ingredient Exclusions (comma-separated)"
-                    value={childExclusions}
-                    onChange={(e) => setChildExclusions(e.target.value)}
-                />
-                <button onClick={handleAddChild} disabled={loading}>
-                    {loading ? 'Saving...' : 'Add Child'}
-                </button>
-            </div>
-            <div className="children-list">
-                {children.map((child) => (
-                    <div key={child.id} className="child-item">
-                        <div>
-                            <strong>{child.name}</strong> - {child.exclusions || 'No exclusions'}
-                        </div>
-                        <div>
-                            <button onClick={() => handleDeleteChild(child.id)}>Delete</button>
-                            <button onClick={() => handleUpdateChild(child.id, child.name, child.exclusions)}>
-                                Update
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            {children.map((child) => (
+                <div key={child.id}>
+                    <button onClick={() => handleChildSelect(child)}>
+                        Edit {child.name}
+                    </button>
+                </div>
+            ))}
+
+            {selectedChild && (
+                <div>
+                    <h3>Edit Child</h3>
+                    <input
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Child's Name"
+                    />
+                    <textarea
+                        value={newExclusions}
+                        onChange={(e) => setNewExclusions(e.target.value)}
+                        placeholder="Exclusions (comma separated)"
+                    />
+                    <button onClick={handleUpdateChild}>Update</button>
+                    {error && <div className="error">{error}</div>}
+                    {success && <div className="success">{success}</div>}
+                </div>
+            )}
         </div>
     );
 };
