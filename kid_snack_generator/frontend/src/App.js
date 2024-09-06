@@ -61,7 +61,8 @@ const App = () => {
     };
 
     // Handle saving a snack
-    const handleSaveSnack = async () => {
+    const handleSaveSnack = async (e) => {
+        e.stopPropagation(); // Prevent triggering other click events
         if (isSnackSaved) return; // Prevent duplicate saves
 
         try {
@@ -87,18 +88,23 @@ const App = () => {
         }
     };
 
+    // Handle deleting a snack
+    const handleDeleteSnack = async (e) => {
+        e.stopPropagation(); // Prevent triggering other click events
+        // Implement the delete snack logic
+        alert('Snack deleted'); // Placeholder alert; replace with delete logic
+    };
+
     return (
         <Router>
             <div className="App">
                 <h1 className="header">Kid Snack Generator</h1>
                 <Routes>
-                    {/* Route for managing children */}
                     <Route
                         path="/admin"
                         element={<ManageChildren fetchChildren={fetchChildren} children={children} />}
                     />
 
-                    {/* Route for selecting children and getting a snack */}
                     <Route
                         path="/"
                         element={
@@ -126,11 +132,14 @@ const App = () => {
                                 </div>
 
                                 {snack && (
-                                    <div className="snack-card snack-result" onClick={handleSaveSnack}>
-                                        <img src={image} alt="Snack" className="snack-image" />
-                                        <h2>Suggested Snack:</h2>
-                                        <p>{snack}</p>
-                                        <button onClick={(e) => { e.stopPropagation(); handleSaveSnack(); }}>Save Snack</button>
+                                    <div className="snack-card-wrapper">
+                                        <div className="snack-card" onClick={handleSaveSnack}>
+                                            <button className="delete-button" onClick={handleDeleteSnack}>X</button>
+                                            <img src={image} alt="Snack" className="snack-image" />
+                                            <h2>Suggested Snack:</h2>
+                                            <p>{snack}</p>
+                                            <button onClick={(e) => handleSaveSnack(e)}>Save Snack</button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
