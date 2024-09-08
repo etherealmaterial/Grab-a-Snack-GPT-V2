@@ -9,11 +9,10 @@ services:
       # Install Node.js dependencies and build the React app
       cd frontend && npm install && npm run build 
       cd ..
-    startCommand: |
+      mkdir -p static
       # Copy the React build output to the Flask static folder
       cp -r frontend/build/* static/
-      # Start the Flask application
-      gunicorn app:app 
+    startCommand: gunicorn app:app
     envVars:  # Environment variables needed for the application
       - key: OPENAI_API_KEY
         value: sk-proj-3CDGAsY4Lg9LAMifw3eqEY24IZ7DdLhJsY4aRONDMapF7yOcTSsVUyLKCL3NUH7EdX0Avv31HQT3BlbkFJ  # Replace with your OpenAI API Key
@@ -23,6 +22,8 @@ services:
         value: proj_JHq0amAdO76lKTG66gwqBKvY
       - key: FLASK_ENV
         value: production
+      - key: DATABASE_URL
+        value: 'sqlite:///children.db'
       - key: REACT_APP_API_BASE_URL
         value: "https://flask-backend.onrender.com"  # Replace with your backend URL
 
