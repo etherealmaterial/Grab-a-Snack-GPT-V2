@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid Snack Generator</title>
+    <style>
+        .snack-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kid Snack Generator</h1>
+    <form id="snackForm">
+        <label for="children">Select Children:</label>
+        <select id="children" multiple>
+            {% for child in children %}
+                <option value="{{ child.id }}">{{ child.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" onclick="getSnack()">Get a Snack</button>
+    </form>
+    <div id="snackResults"></div>
+
+    <script>
+        function getSnack() {
+            const selectedChildren = Array.from(document.getElementById('children').selectedOptions).map(option => option.value);
+            fetch('/get_snack', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({children: selectedChildren})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('snackResults');
+                resultDiv.innerHTML = `<div class="snack-card">${data.snack}</div>`;
+            });
+        }
+    </script>
+</body>
+</html>

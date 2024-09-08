@@ -1,0 +1,261 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', sans-serif; /* Default font for body text */
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif; /* Font for all headings */
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.header {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #3a3a3a;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 1000px; /* Maximum width for form-container */
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.form-container select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-container button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.form-container button:hover {
+  background-color: #45a049;
+}
+
+/* Snack card container with grid display */
+.snack-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 325px)); /* Set minimum and maximum widths */
+  gap: 20px;
+  justify-content: center; /* Center the cards within the container */
+  align-items: start; /* Align items to the top */
+  max-width: 1200px; /* Maximum width for the grid */
+  margin: 0 auto; /* Center the container */
+  padding: 20px; /* Add padding around the grid */
+}
+
+/* Wrapper for snack card */
+.snack-card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+  width: 100%;
+  max-width: 325px; /* Set a maximum width for cards */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Style for the snack card */
+.snack-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 325px; /* Limit the width for cards */
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.snack-card.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.snack-card:hover {
+  transform: scale(1.02);
+}
+
+/* Style for the snack image */
+.snack-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px;
+  border-radius: 8px;
+}
+
+/* Delete button in the top right corner */
+.delete-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: grey;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+/* Hover effect on delete button */
+.delete-button:hover {
+  color: darkgrey;
+}
+
+/* Overlay effect when hovering over the delete button */
+.snack-card-wrapper:hover .snack-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.1); /* Grey overlay on hover */
+  z-index: 0;
+  pointer-events: none;
+  transition: background-color 0.3s ease;
+}
+
+/* Save Snack button styles */
+.save-snack-button {
+  background-color: #4caf50; /* Green */
+  color: white;
+  padding: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.save-snack-button:hover {
+  background-color: #45a049;
+}
+
+/* Do Not Show Again button styles */
+.do-not-show-button {
+  background-color: #ff9800; /* Orange */
+  color: white;
+  padding: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.do-not-show-button:hover {
+  background-color: #e68900;
+}
+
+/* Container for admin section */
+.admin-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Styles for select and input fields */
+.child-select,
+.input-group {
+  margin-bottom: 20px;
+}
+
+.child-dropdown,
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Button styles */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.add-button:hover {
+  background-color: #45a049;
+}
+
+.update-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.update-button:hover {
+  background-color: #1e88e5;
+}
+
+.delete-button-admin {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-button-admin:hover {
+  background-color: #e53935;
+}

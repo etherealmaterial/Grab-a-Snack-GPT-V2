@@ -1,0 +1,31 @@
+services:
+  - type: web  # Defines a single web service
+    name: kid-snack-app  # Name for your application
+    env: python  # Python environment for Flask backend
+    plan: free  # Render plan (choose according to your needs)
+    buildCommand: |
+      # Install Python dependencies
+      pip install -r requirements.txt 
+      # Install Node.js dependencies and build the React app
+      cd frontend && npm install && npm run build 
+      cd ..
+    startCommand: |
+      # Copy the React build output to the Flask static folder
+      cp -r frontend/build/* static/
+      # Start the Flask application
+      gunicorn app:app 
+    envVars:  # Environment variables needed for the application
+      - key: OPENAI_API_KEY
+        value: sk-proj-3CDGAsY4Lg9LAMifw3eqEY24IZ7DdLhJsY4aRONDMapF7yOcTSsVUyLKCL3NUH7EdX0Avv31HQT3BlbkFJ  # Replace with your OpenAI API Key
+      - key: OPENAI_ORGANIZATION
+        value: org-yy3ASFoJmuSNux38QrZwhoGq
+      - key: OPENAI_PROJECT
+        value: proj_JHq0amAdO76lKTG66gwqBKvY  
+    autoDeploy: true  # Enable automatic deployment on changes
+    region: oregon  # Choose your preferred region
+    routes:
+      # Serve the index.html for all frontend routes to support React Router
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    healthCheckPath: /api/children  # Update this to the appropriate health check path
