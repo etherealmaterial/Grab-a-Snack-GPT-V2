@@ -20,12 +20,12 @@ services:
       - key: OPENAI_ORGANIZATION
         value: org-yy3ASFoJmuSNux38QrZwhoGq
       - key: OPENAI_PROJECT
-        value: proj_JHq0amAdO76lKTG66gwqBKvY  
+        value: proj_JHq0amAdO76lKTG66gwqBKvY
+      - key: FLASK_ENV
+        value: production
+      - key: REACT_APP_API_BASE_URL
+        value: "https://flask-backend.onrender.com"  # Replace with your backend URL
+
     autoDeploy: true  # Enable automatic deployment on changes
     region: oregon  # Choose your preferred region
-    routes:
-      # Serve the index.html for all frontend routes to support React Router
-      - type: rewrite
-        source: /*
-        destination: /index.html
     healthCheckPath: /api/children  # Update this to the appropriate health check path
