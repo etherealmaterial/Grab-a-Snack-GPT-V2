@@ -4,8 +4,13 @@ services:
     env: python  # Python environment for Flask backend
     plan: free  # Render plan (choose according to your needs)
     buildCommand: |
-      pip install -r requirements.txt
-      cd frontend && npm install && npm run build
+      # Install Python dependencies
+      pip install -r requirements.txt 
+      # Install Node.js dependencies and build the React app
+      cd frontend && npm install && npm run build 
+      cd ..
+      mkdir -p static
+      # Copy the React build output to the Flask static folder
       cp -r frontend/build/* static/
     startCommand: gunicorn app:app
     envVars:  # Environment variables needed for the application
