@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
+// Base URL for API, adjust to use environment variables
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
+
 const ManageChildren = ({ fetchChildren, children }) => {
     const [selectedChild, setSelectedChild] = useState(null);
     const [childName, setChildName] = useState('');
@@ -12,7 +15,7 @@ const ManageChildren = ({ fetchChildren, children }) => {
 
     const fetchSnacks = async (childId) => {
         try {
-            const response = await fetch(`/get_snacks/${childId}`);
+            const response = await fetch(`${API_BASE_URL}/get_snacks/${childId}`); // Updated to use API_BASE_URL
             const data = await response.json();
             if (response.ok) {
                 setSnacks(data);
@@ -34,7 +37,7 @@ const ManageChildren = ({ fetchChildren, children }) => {
 
     const handleAddChild = async () => {
         try {
-            const response = await fetch('/api/children', {
+            const response = await fetch(`${API_BASE_URL}/api/children`, { // Updated to use API_BASE_URL
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: childName, exclusions }),
@@ -58,7 +61,7 @@ const ManageChildren = ({ fetchChildren, children }) => {
         if (!selectedChild) return alert('No child selected for update.');
 
         try {
-            const response = await fetch(`/api/children/${selectedChild}`, {
+            const response = await fetch(`${API_BASE_URL}/api/children/${selectedChild}`, { // Updated to use API_BASE_URL
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: childName, exclusions }),
@@ -80,7 +83,7 @@ const ManageChildren = ({ fetchChildren, children }) => {
         if (!selectedChild) return alert('No child selected for deletion.');
 
         try {
-            const response = await fetch(`/api/children/${selectedChild}`, {
+            const response = await fetch(`${API_BASE_URL}/api/children/${selectedChild}`, { // Updated to use API_BASE_URL
                 method: 'DELETE',
             });
 
@@ -101,7 +104,7 @@ const ManageChildren = ({ fetchChildren, children }) => {
 
     const handleDeleteSnack = async (snackId) => {
         try {
-            const response = await fetch(`/delete_snack/${snackId}`, {
+            const response = await fetch(`${API_BASE_URL}/delete_snack/${snackId}`, { // Updated to use API_BASE_URL
                 method: 'DELETE',
             });
 
@@ -161,7 +164,7 @@ const ManageChildren = ({ fetchChildren, children }) => {
                         {snacks.length > 0 ? (
                             snacks.map((snack) => (
                                 <div key={snack.id} className="col-md-6 col-lg-4 mb-4">
-                                    <div className="card">
+                                    <div className="card mx-auto" style={{ maxWidth: '325px' }}>
                                         <div className="card-body position-relative">
                                             <button className="btn-close position-absolute top-0 end-0" aria-label="Close" onClick={() => handleDeleteSnack(snack.id)}></button>
                                             <img src={snack.image_url} alt="Snack" className="card-img-top rounded mb-3" />

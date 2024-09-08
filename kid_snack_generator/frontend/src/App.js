@@ -1,7 +1,11 @@
+// App.js
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import ManageChildren from './ManageChildren';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+// Base URL for API, adjust to use environment variables
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
 const App = () => {
     const [children, setChildren] = useState([]);
@@ -17,7 +21,7 @@ const App = () => {
     // Fetch the list of children
     const fetchChildren = async () => {
         try {
-            const response = await fetch('/api/children');
+            const response = await fetch(`${API_BASE_URL}/api/children`); // Updated to use API_BASE_URL
             if (response.ok) {
                 const data = await response.json();
                 setChildren(data);
@@ -31,7 +35,7 @@ const App = () => {
     };
 
     useEffect(() => {
-        fetchChildren(); // Fetch children when the component mounts
+        fetchChildren();
     }, []);
 
     // Handle generating a snack
@@ -40,10 +44,10 @@ const App = () => {
         setError('');
         setSnack('');
         setImage('');
-        setIsSnackSaved(false);  // Reset the saved state
-        setDoNotShowAgain(false); // Reset the do not show again state
+        setIsSnackSaved(false);
+        setDoNotShowAgain(false);
         try {
-            const response = await fetch('/get_snack', {
+            const response = await fetch(`${API_BASE_URL}/get_snack`, {  // Updated to use API_BASE_URL
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ children: selectedChildren }),
@@ -53,7 +57,7 @@ const App = () => {
             if (response.ok && data.snack) {
                 setSnack(data.snack);
                 setImage(data.image_url);
-                setSnackExists(data.exists); // Check if snack already exists
+                setSnackExists(data.exists);
             } else {
                 throw new Error(data.error || 'Failed to generate snack');
             }
@@ -66,15 +70,15 @@ const App = () => {
 
     // Handle saving a snack
     const handleSaveSnack = async (e) => {
-        e.stopPropagation(); // Prevent triggering other click events
-        if (isSnackSaved) return; // Prevent duplicate saves
+        e.stopPropagation();
+        if (isSnackSaved) return;
 
         try {
-            const response = await fetch('/save_snack', {
+            const response = await fetch(`${API_BASE_URL}/save_snack`, {  // Updated to use API_BASE_URL
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    child_id: selectedChildren[0], // Assuming you are saving for the first selected child
+                    child_id: selectedChildren[0],
                     snack: snack,
                     image_url: image,
                 }),
@@ -83,20 +87,13 @@ const App = () => {
             const data = await response.json();
             if (response.ok) {
                 alert(data.message);
-                setIsSnackSaved(true); // Mark as saved
+                setIsSnackSaved(true);
             } else {
                 console.error('Error saving snack:', data.error);
             }
         } catch (error) {
             console.error('Error saving snack:', error);
         }
-    };
-
-    // Handle deleting a snack
-    const handleDeleteSnack = async (e) => {
-        e.stopPropagation(); // Prevent triggering other click events
-        // Implement the delete snack logic
-        alert('Snack deleted'); // Placeholder alert; replace with delete logic
     };
 
     // Handle "do not show again"
@@ -118,8 +115,8 @@ const App = () => {
                     <Route
                         path="/"
                         element={
-                            <div className="mx-auto">
-                                <div className="form-container mx-auto">
+                            <div>
+                                <div className="form-container">
                                     <label htmlFor="children">Select Children:</label>
                                     <select
                                         id="children"
@@ -142,7 +139,7 @@ const App = () => {
                                 </div>
 
                                 {snack && !doNotShowAgain && (
-                                    <div className="snack-card-wrapper mx-auto">
+                                    <div className="snack-card-wrapper">
                                         <div className={`snack-card ${snackExists ? 'highlight-snack' : ''}`} onClick={handleSaveSnack}>
                                             <button className="delete-button" onClick={handleDeleteSnack}>X</button>
                                             <img src={image} alt="Snack" className="snack-image" />

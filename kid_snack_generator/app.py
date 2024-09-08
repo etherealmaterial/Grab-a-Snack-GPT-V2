@@ -12,11 +12,11 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Enable CORS for the React app
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+# Enable CORS for the React app, adapt to use environment variable
+CORS(app, resources={r"/*": {"origins": os.getenv('CLIENT_ORIGIN') or '*'}})
 
 # Configure database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///children.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///children.db')  # Use environment variable for database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -198,4 +198,4 @@ def serve_image(filename):
     return send_from_directory('uploads', filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)), debug=True)
