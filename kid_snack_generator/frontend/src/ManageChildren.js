@@ -118,10 +118,10 @@ const ManageChildren = ({ fetchChildren, children }) => {
     };
 
     return (
-        <div className="admin-container">
+        <div className="admin-container container mt-4">
             <h2>Manage Children</h2>
-            <div className="child-select">
-                <select className="child-dropdown" onChange={(e) => handleSelectChild(e.target.value)}>
+            <div className="child-select mb-3">
+                <select className="form-select" onChange={(e) => handleSelectChild(e.target.value)}>
                     <option value="">Select a child</option>
                     {children.map((child) => (
                         <option key={child.id} value={child.id}>
@@ -131,40 +131,42 @@ const ManageChildren = ({ fetchChildren, children }) => {
                 </select>
             </div>
 
-            <div className="input-group">
+            <div className="input-group mb-3">
                 <input
                     type="text"
-                    className="input-field"
+                    className="form-control"
                     placeholder="Child Name"
                     value={childName}
                     onChange={(e) => setChildName(e.target.value)}
                 />
                 <input
                     type="text"
-                    className="input-field"
+                    className="form-control"
                     placeholder="Exclusions"
                     value={exclusions}
                     onChange={(e) => setExclusions(e.target.value)}
                 />
             </div>
 
-            <div className="button-group">
-                <button className="action-button add-button" onClick={handleAddChild}>Add Child</button>
-                <button className="action-button update-button" onClick={handleUpdateChild}>Update Child</button>
-                <button className="action-button delete-button" onClick={handleDeleteChild}>Delete Child</button>
+            <div className="button-group mb-4">
+                <button className="btn btn-success me-2" onClick={handleAddChild}>Add Child</button>
+                <button className="btn btn-primary me-2" onClick={handleUpdateChild}>Update Child</button>
+                <button className="btn btn-danger" onClick={handleDeleteChild}>Delete Child</button>
             </div>
 
             {selectedChild && (
                 <div className="snacks-section">
                     <h3>Saved Snacks</h3>
-                    <div className="snack-card-container">
+                    <div className="row">
                         {snacks.length > 0 ? (
                             snacks.map((snack) => (
-                                <div key={snack.id} className="snack-card-wrapper">
-                                    <div className="snack-card">
-                                        <button className="delete-button" onClick={() => handleDeleteSnack(snack.id)}>X</button>
-                                        <img src={snack.image_url} alt="Snack" className="snack-image" />
-                                        <p>{snack.snack}</p>
+                                <div key={snack.id} className="col-md-6 col-lg-4 mb-4">
+                                    <div className="card">
+                                        <div className="card-body position-relative">
+                                            <button className="btn-close position-absolute top-0 end-0" aria-label="Close" onClick={() => handleDeleteSnack(snack.id)}></button>
+                                            <img src={snack.image_url} alt="Snack" className="card-img-top rounded mb-3" />
+                                            <p className="card-text">{snack.snack}</p>
+                                        </div>
                                     </div>
                                 </div>
                             ))

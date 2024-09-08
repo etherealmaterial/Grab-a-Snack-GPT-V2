@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from openai import OpenAI
@@ -139,9 +139,6 @@ def get_snack():
         image_url = image_response.data[0].url
 
         return jsonify({'snack': snack_idea, 'image_url': image_url})
-    except openai.OpenAIError as e:
-        logging.error(f"OpenAI API Error: {e}")
-        return jsonify({"error": f"OpenAI API Error: {str(e)}"}), 500
     except Exception as e:
         logging.error(f"Error generating snack: {e}")
         return jsonify({"error": "Error generating snack. Please try again."}), 500
@@ -195,6 +192,10 @@ def delete_snack(snack_id):
     except Exception as e:
         logging.error(f"Error deleting snack: {e}")
         return jsonify({"error": "Error deleting snack. Please try again."}), 500
+
+@app.route('/uploads/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('uploads', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)

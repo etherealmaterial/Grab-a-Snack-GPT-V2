@@ -1,10 +1,17 @@
 /* App.css */
 
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@400;700&display=swap');
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Open Sans', sans-serif; /* Default font for body text */
   background-color: #f5f5f5;
   color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif; /* Font for all headings */
 }
 
 .App {
@@ -51,17 +58,34 @@ body {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .form-container button:hover {
   background-color: #45a049;
 }
 
+/* Snack card container with grid display */
+.snack-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid for cards */
+  gap: 20px;
+  justify-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 /* Wrapper for snack card */
 .snack-card-wrapper {
-  position: relative;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: 10px;
+  max-width: 300px;
+  position: relative;
 }
 
 /* Style for the snack card */
@@ -69,15 +93,27 @@ body {
   background-color: white;
   border: 1px solid #ddd;
   padding: 20px;
-  margin: 10px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  transition: background-color 0.3s ease;
-  z-index: 1;
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.snack-card:hover {
+  transform: scale(1.02);
+}
+
+/* Style for the snack image */
+.snack-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px;
+  border-radius: 8px;
 }
 
 /* Delete button in the top right corner */
@@ -87,7 +123,7 @@ body {
   right: 5px;
   background: none;
   border: none;
-  color: darkgrey;
+  color: grey;
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
@@ -97,7 +133,7 @@ body {
 
 /* Hover effect on delete button */
 .delete-button:hover {
-  color: red;
+  color: darkgrey;
 }
 
 /* Overlay effect when hovering over the delete button */
@@ -114,17 +150,43 @@ body {
   transition: background-color 0.3s ease;
 }
 
-/* Style for the snack image */
-.snack-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto 10px;
+/* Save Snack button styles */
+.save-snack-button {
+  background-color: #4caf50; /* Green */
+  color: white;
+  padding: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.save-snack-button:hover {
+  background-color: #45a049;
+}
+
+/* Do Not Show Again button styles */
+.do-not-show-button {
+  background-color: #ff9800; /* Orange */
+  color: white;
+  padding: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.do-not-show-button:hover {
+  background-color: #e68900;
 }
 
 /* Container for admin section */
 .admin-container {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -159,70 +221,29 @@ body {
   transition: background-color 0.3s;
 }
 
-.add-button { background-color: #4caf50; color: white; }
-.add-button:hover { background-color: #45a049; }
-.update-button { background-color: #2196f3; color: white; }
-.update-button:hover { background-color: #1e88e5; }
-.delete-button { background-color: #f44336; color: white; }
-.delete-button:hover { background-color: #e53935; }
-
-/* Snack card container with grid display */
-.snack-card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+.add-button {
+  background-color: #4caf50;
+  color: white;
 }
 
-/* Snack card styles */
-.snack-card-wrapper {
-  margin: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.add-button:hover {
+  background-color: #45a049;
 }
 
-.snack-card {
-  position: relative;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  width: 100%;
-  max-width: 200px;
-  transition: transform 0.3s, background-color 0.3s;
+.update-button {
+  background-color: #2196f3;
+  color: white;
 }
 
-.snack-card:hover {
-  transform: scale(1.02);
+.update-button:hover {
+  background-color: #1e88e5;
 }
 
-.snack-image {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin-bottom: 10px;
+.delete-button-admin {
+  background-color: #f44336;
+  color: white;
 }
 
-/* Delete button styles */
-.delete-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: none;
-  border: none;
-  color: darkgray;
-  font-size: 16px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.delete-button:hover {
-  color: black;
-}
-
-/* Hover effect for card when hovering over the delete button */
-.delete-button:hover ~ .snack-card {
-  background-color: rgba(0, 0, 0, 0.1);
+.delete-button-admin:hover {
+  background-color: #e53935;
 }
