@@ -25,7 +25,7 @@ services:
       - key: DATABASE_URL
         value: 'sqlite:///children.db'
       - key: REACT_APP_API_BASE_URL
-        value: "https://flask-backend.onrender.com"  # Replace with your backend URL
+        value: "https://kid-snack-app.onrender.com"  # Replace with your backend URL
 
     autoDeploy: true  # Enable automatic deployment on changes
     region: oregon  # Choose your preferred region
