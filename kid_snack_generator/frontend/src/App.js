@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import './App.css';
 import ManageChildren from './ManageChildren';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
@@ -40,8 +40,8 @@ const App = () => {
         setError('');
         setSnack('');
         setImage('');
-        setIsSnackSaved(false);
-        setDoNotShowAgain(false);
+        setIsSnackSaved(false);  // Reset the saved state
+        setDoNotShowAgain(false); // Reset the do not show again state
         try {
             const response = await fetch('/get_snack', {
                 method: 'POST',
@@ -66,7 +66,7 @@ const App = () => {
 
     // Handle saving a snack
     const handleSaveSnack = async (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // Prevent triggering other click events
         if (isSnackSaved) return; // Prevent duplicate saves
 
         try {
@@ -94,7 +94,8 @@ const App = () => {
 
     // Handle deleting a snack
     const handleDeleteSnack = async (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // Prevent triggering other click events
+        // Implement the delete snack logic
         alert('Snack deleted'); // Placeholder alert; replace with delete logic
     };
 
@@ -106,8 +107,8 @@ const App = () => {
 
     return (
         <Router>
-            <div className="App container">
-                <h1 className="header text-center">Kid Snack Generator</h1>
+            <div className="App">
+                <h1 className="header">Kid Snack Generator</h1>
                 <Routes>
                     <Route
                         path="/admin"
@@ -117,12 +118,11 @@ const App = () => {
                     <Route
                         path="/"
                         element={
-                            <div>
-                                <div className="form-container mb-4">
+                            <div className="mx-auto">
+                                <div className="form-container mx-auto">
                                     <label htmlFor="children">Select Children:</label>
                                     <select
                                         id="children"
-                                        className="form-select"
                                         multiple
                                         value={selectedChildren}
                                         onChange={(e) =>
@@ -135,22 +135,22 @@ const App = () => {
                                             </option>
                                         ))}
                                     </select>
-                                    <button onClick={handleGetSnack} className="btn btn-success w-100 mt-3" disabled={loading}>
+                                    <button onClick={handleGetSnack} disabled={loading}>
                                         {loading ? 'Generating...' : 'Get a Snack'}
                                     </button>
-                                    {error && <div className="alert alert-danger mt-3">{error}</div>}
+                                    {error && <div className="error">{error}</div>}
                                 </div>
 
                                 {snack && !doNotShowAgain && (
-                                    <div className="card mb-4 position-relative">
-                                        <div className="card-body">
-                                            <button className="btn-close position-absolute top-0 end-0" aria-label="Close" onClick={handleDeleteSnack}></button>
-                                            <img src={image} alt="Snack" className="card-img-top rounded mb-3" />
-                                            <h2 className="card-title">Suggested Snack:</h2>
-                                            <p className="card-text">{snack}</p>
-                                            {snackExists && <p className="text-muted">People are loving this snack! Check it out in your saved snacks.</p>}
-                                            <button className="btn btn-success w-100 mb-2" onClick={handleSaveSnack}>Save Snack</button>
-                                            <button className="btn btn-warning w-100" onClick={handleDoNotShowAgain}>Do Not Show Again</button>
+                                    <div className="snack-card-wrapper mx-auto">
+                                        <div className={`snack-card ${snackExists ? 'highlight-snack' : ''}`} onClick={handleSaveSnack}>
+                                            <button className="delete-button" onClick={handleDeleteSnack}>X</button>
+                                            <img src={image} alt="Snack" className="snack-image" />
+                                            <h2>Suggested Snack:</h2>
+                                            <p>{snack}</p>
+                                            {snackExists && <p>People are loving this snack! Check it out in your saved snacks.</p>}
+                                            <button className="save-snack-button" onClick={(e) => handleSaveSnack(e)}>Save Snack</button>
+                                            <button className="do-not-show-button" onClick={handleDoNotShowAgain}>Do Not Show Again</button>
                                         </div>
                                     </div>
                                 )}
