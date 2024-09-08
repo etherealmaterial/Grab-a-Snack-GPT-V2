@@ -4,13 +4,8 @@ services:
     env: python  # Python environment for Flask backend
     plan: free  # Render plan (choose according to your needs)
     buildCommand: |
-      # Install Python dependencies
-      pip install -r requirements.txt 
-      # Install Node.js dependencies and build the React app
-      cd frontend && npm install && npm run build 
-      cd ..
-      mkdir -p static
-      # Copy the React build output to the Flask static folder
+      pip install -r requirements.txt
+      cd frontend && npm install && npm run build
       cp -r frontend/build/* static/
     startCommand: gunicorn app:app
     envVars:  # Environment variables needed for the application
@@ -26,7 +21,6 @@ services:
         value: 'sqlite:///children.db'
       - key: REACT_APP_API_BASE_URL
         value: "https://kid-snack-app.onrender.com"  # Replace with your backend URL
-
     autoDeploy: true  # Enable automatic deployment on changes
     region: oregon  # Choose your preferred region
     healthCheckPath: /api/children  # Update this to the appropriate health check path
